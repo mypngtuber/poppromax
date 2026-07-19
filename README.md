@@ -63,9 +63,11 @@ An AI-powered, production-grade web editor built for **one workflow only**: turn
   - image/meme/screenshot → best frame captured as PNG
 - Frame capture and segment trimming available as reusable services
 
-### Export
-- **Video export**: real-time canvas render → WebM (VP9 + Opus, 16 Mbps) with mixed voice + mastered music + SFX, progress bar, cancellable
-- **Premiere-compatible FCPXML 1.10** — preserves timing, tracks/lanes, transforms, captions as titles, audio roles
+### Export (rewritten — offline, frame-accurate)
+- **MP4 H.264 + AAC export (primary)** — WebCodecs offline pipeline: every frame is seeked & awaited before drawing (**no dropped/black frames**), H.264 encode (hardware→software fallback across profiles), audio mixed with OfflineAudioContext (VTuber voice + music with dB/treble/fades + SFX) → AAC, muxed to .mp4 via `mp4-muxer` (CDN), 12 Mbps, faststart
+- **Graceful fallbacks**: VP9-in-MP4 → MediaRecorder MP4 → MediaRecorder WebM (real-time) — user is told which format was produced
+- **Premiere Pro Package (ZIP)** — `Project.fcpxml` + `Media/` folder with a copy of **every used material** (originals, uncompressed-stored) + bilingual README; import the XML in Premiere and all media links resolve automatically via relative paths
+- **Premiere-compatible FCPXML 1.10** (standalone) — preserves timing, tracks/lanes, transforms, captions as titles, audio roles
 - **.vtproject export** with embedded assets
 
 ---
@@ -99,7 +101,7 @@ js/
     renderer.js                   — frame compositor (layers, animations, karaoke captions)
     audio.js                      — WebAudio playback (dB gains, treble shelf, fades)
     timeline.js                   — canvas NLE timeline
-    exporter.js                   — WebM render, FCPXML, .vtproject
+    exporter.js                   — MP4 H.264 (WebCodecs+mp4-muxer), Premiere ZIP package (JSZip), FCPXML, .vtproject
   ui/
     components.js                 — toast/modal/dropzone/sliders
     views/                        — dashboard, projects, editor, materials, export, settings
@@ -107,7 +109,6 @@ js/
 ```
 
 ## 🚧 Not Yet Implemented
-- FFmpeg.wasm H.264 MP4 encode (currently WebM; FCPXML covers pro pipelines)
 - Proxy media generation (currently renders originals; playback is realtime-synced)
 - Slip/slide tools & dedicated ripple-delete button (move/trim/split/duplicate done)
 - Waveform & thumbnail rendering inside timeline clips
@@ -116,11 +117,11 @@ js/
 - Cloud sync, YouTube/TikTok/Instagram upload, AI thumbnail/title/SEO generators
 
 ## 👉 Recommended Next Steps
-1. Integrate `@ffmpeg/ffmpeg` WASM for true H.264 MP4 export in a Web Worker
-2. Timeline clip thumbnails + audio waveform cache
-3. Proxy (low-res) preview transcoding for very large source videos
-4. Custom caption template creator UI (save unlimited user templates)
-5. Slip/slide edit modes + ripple delete + dynamic track add/remove UI
+1. Timeline clip thumbnails + audio waveform cache
+2. Proxy (low-res) preview transcoding for very large source videos
+3. Custom caption template creator UI (save unlimited user templates)
+4. Slip/slide edit modes + ripple delete + dynamic track add/remove UI
+5. Optional quality/bitrate selector in the Export view
 
 ## 🧭 The Workflow
 1. Upload VTuber green-screen video (defaults auto-applied)
@@ -129,4 +130,4 @@ js/
 4. Resolve the **Materials Needed** queue (Search / Upload / Skip)
 5. **Generate Timeline** — fully built automatically
 6. Fine-tune anything manually (timeline, captions, chroma, audio)
-7. Export WebM / Premiere FCPXML / `.vtproject`
+7. Export MP4 (H.264) / Premiere Package (XML + Media) / FCPXML / `.vtproject`
