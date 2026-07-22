@@ -86,7 +86,7 @@ export const GEMINI_MODELS = [
   'gemini-2.5-flash',
   'gemini-2.5-flash-lite',
 ];
-export const GEMINI_DEFAULT_MODEL = 'gemini-2.5-flash';
+export const GEMINI_DEFAULT_MODEL = 'gemini-3.6-flash';
 export const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 /** Timeline track definitions — dynamic, extendable */
